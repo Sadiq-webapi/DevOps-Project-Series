@@ -1,37 +1,53 @@
 #!/usr/bin/env bash
 
-EMAIL="manojdevopstest@gmail.com"
-SUBJECT="Docker Service Alert"
-RESTART_SUBJECT="Docker Service Restart Attempt"
+#Check if s-nail is installed; if not, install it
+if ! command -v s-nail &> /dev/null; then
+    echo "s-nail not found. Installing..."
+    yum install s-nail -y
 
-# Get Docker status, version, and current time
+    # Verify installation success
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to install s-nail. Email alerts will fail."
+        # You can choose to exit 1 here if the email is critical
+    fi
+fi
+
+
+# --- CONFIGURATION ---
+EMAIL="mohamedsadiq9741@gmail.com"
+PASS="abwvuchfrifrhmyr"
+MTA="smtps://mohamedsadiq9741%40gmail.com:${PASS}@smtp.gmail.com:465"
+
+# Get Docker status
 dockerStatus=$(systemctl is-active docker)
 dockerVersion=$(docker -v | awk '{print $3}' | tr -d ',')
 cdate=$(date)
 
-# Print the variables
 echo "Current time is          : $cdate"
-echo "Current Version of Docker: $dockerVersion"
 echo "Docker Status            : $dockerStatus"
 
-# If Docker is not active, send email
 if [[ "$dockerStatus" != "active" ]]; then
-    MESSAGE="ALERT!!!: Docker service is NOT running.\n\nVersion : $dockerVersion\nDate    : $cdate"
-    echo -e "$MESSAGE" | mail -s "$SUBJECT" "$EMAIL"
-    echo "Docker is not active — sent email alert."
+    MESSAGE="ALERT: Docker is DOWN on $(hostname)."
 
-    # Attempt to restart Docker
-    systemctl restart docker
-    sleep 3
+    echo "Connecting to Gmail to send alert..."
 
-    # Refresh the date and recheck Docker status
-    restartTime=$(date)
-    newStatus=$(systemctl is-active docker)
-    RESTART_MESSAGE="Docker restart attempted at $restartTime.\nNew status: $newStatus"
+    # This specific command bypasses the sendmail error
+    echo -e "$MESSAGE" | s-nail -v \
+        -s "Docker Service Alert" \
+        -S v15-compat=yes \
+        -S mta="$MTA" \
+        -S from="$EMAIL" \
+        "$EMAIL"
 
-    echo -e "$RESTART_MESSAGE" | mail -s "$RESTART_SUBJECT" "$EMAIL"
-    echo "Restart attempt result emailed."
+    sleep 5
+
+    NEW_STATUS=$(systemctl is-active docker)
+    echo "Restart attempted. New Status: $NEW_STATUS" | s-nail -v \
+        -s "Docker Restart Result" \
+        -S v15-compat=yes \
+        -S mta="$MTA" \
+        -S from="$EMAIL" \
+        "$EMAIL"
 else
     echo "Docker is running normally."
 fi
-
