@@ -1,24 +1,24 @@
 provider "aws" {
-    region = "us-east-1"
+    region = "ap-south-2"
     access_key = ""
     secret_key = "" 
 }
 
 
 resource "aws_instance" "admin" {
-    ami = "ami-084568db4383264d4"
-    instance_type = "t2.medium"
+    ami = "ami-0aa31b568c1e8d622"
+    instance_type = "t3.micro"
     security_groups = [ "default" ]
-    key_name = "project"
+    key_name = "jenkins"
     root_block_device {
       volume_size = 20
       volume_type = "gp3"
       delete_on_termination = true
     }
     tags = {
-        Name = "Admin-server"
+        Name = "server"
     }
-    user_data = file("server-script.sh")
+    user_data = file("serverscript.sh")
 }
 
 
