@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "ap-south-2"
 }
 
 #creating vpc
@@ -16,7 +16,7 @@ resource "aws_vpc" "myvpc" {
 resource "aws_subnet" "subnet_1" {
   vpc_id = aws_vpc.myvpc.id
   cidr_block = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = "ap-south-2a"
   map_public_ip_on_launch = true 
   tags = {
     Name = "subnet 1"
@@ -28,7 +28,7 @@ resource "aws_subnet" "subnet_1" {
 resource "aws_subnet" "subnet_2" {
   vpc_id = aws_vpc.myvpc.id
   cidr_block = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
+  availability_zone = "ap-south-2b"
   map_public_ip_on_launch = true 
   tags = {
     Name = "subnet 2"
