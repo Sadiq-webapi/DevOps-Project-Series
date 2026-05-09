@@ -24,7 +24,7 @@ pipeline {
         }
         stage('Build and tag'){
             steps{
-                sh "docker build -t manojkrishnappa/test:1"
+                sh "docker build -t manojkrishnappa/test:1 ."
             }
         }
         stage('containersation'){
